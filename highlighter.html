@@ -1,0 +1,155 @@
+
+<!-- saved from url=(0045)http://huffpostlabs.github.io/highlighter.js/ -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<link rel="stylesheet" type="text/css" href="./app.css">
+	<link href="./css" rel="stylesheet" type="text/css">
+<style type="text/css"></style></head>
+
+
+<body>
+    <h1 id="title" style="text-align: center">Markner</h1>
+    <div style="margin-left: 10%;">
+        <form>
+          <!--
+          Enter a url or upload a text file
+          <input type="url" id="url"></input>
+          <input type="submit" id="url-btn" value="Load" onclick="loadDoc()"></input>
+          <input type="file" id="file">
+          //-->
+          Upload a text file
+          <input type="file" id="file"></input>
+        </form>
+        <button type="button" onclick="changeDir('ltr')">LTR</button>
+        <button type="button" onclick="changeDir('rtl')">RTL</button>
+
+ 
+		<div class="article" style="width: 85%; height: 80%;" contenteditable="true">
+            <article style="width: 90%; height: 70%;" id="area">
+                Highlight some body text! 
+                    This is a jQuery plugin that allows you to display a pop-up tooltip when a user highlights text. This can be useful in a variety
+                    of situations, and there didn't seem to be a good open source solution before this.
+                    on how to implement this on your website. It's very easy!
+            </article>
+		</div>
+	</div>
+
+	<span class="holder" style="display: none; position: absolute; top: 323.4375px; left: 721.1953125px;">
+		<div class="share-highlight-btn">
+			<div class="btn-caret">
+			</div>
+			<div class="btn-left" onclick="replaceText('persName')">Person</div>
+			<div class="btn-left" onclick="replaceText('orgName')">Org</div>
+			<div class="btn-left" onclick="replaceText('bibl')">Bibl</div>
+			<div class="btn-left" onclick="replaceText('placeName')">Place</div>
+			<div class="btn-left" onclick="replaceText('meeting')">Meet</div>
+			<div class="btn-right">×</div>
+		</div>
+	</span>
+
+	<script src=".//jquery.min.js"></script> 
+	<script type="text/javascript" src="./jQuery.highlighter.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function() {
+            $(".article").highlighter({
+                "selector": ".holder",
+                "complete" : function(data){
+                }
+            })
+
+    
+		    $('.holder').mousedown(function(){
+		        return false;
+		    });
+
+		    $('.btn-right').click(function(){
+		        $('.holder').hide();
+		        return false;
+		    });
+            window.area = document.getElementById('area');
+            window.fileIn = document.getElementById('file');
+            window.file.addEventListener('change', readDoc); 
+		});
+
+        function wrapText(txt, wrapper) {
+            return '<'+ wrapper + '>' + txt + '</' + wrapper + '>';
+        }
+        function replaceText(type) {
+            replaceSelectedText(type);
+            $('.holder').hide();
+        }
+
+        function replaceSelectedText(wrapper) {
+          var sel, range, oldTxt, newTxt;
+          if (window.getSelection) {
+              sel = window.getSelection();
+              oldTxt = sel.toString();
+              newTxt = wrapText(oldTxt, wrapper);
+              if (sel.rangeCount) {
+                  range = sel.getRangeAt(0);
+                  range.deleteContents();
+                  range.insertNode(document.createTextNode(newTxt));
+              }
+          } else if (document.selection && document.selection.createRange) {
+              range = document.selection.createRange();
+              oldTxt = range.text;
+              newTxt = wrapText(oldTxt, wrapper);            
+              range.text = newTxt;
+          }
+        }
+
+        function readDoc() {
+          var file = window.fileIn.files[0];
+          if (file.type.match(/text.*/)) {
+            var reader = new FileReader();
+            reader.onload = function() {
+              window.area.textContent = reader.result;
+            }
+            reader.readAsText(file);
+          }
+          else {
+            window.area.textContent = "Error: only text files are supported";
+          }
+        }
+
+        function loadDoc(url) {
+          url = $('#url')[0].val()
+          if (url.slice(0,4) == "file:")
+            uri = url.replace(/^file:\/\//, '');
+          else
+            uri = url;
+          $.ajax({
+            async: true,
+            url: uri,
+            dataType: 'text',
+            success: function(data) {
+              window.area.textContent = data;
+            },
+            error: function(xhr, ajaxOptions, thrownError) {
+              window.area.textContent = "failed";
+            },
+            complete: function() {
+                alert("fdgdfgdfg");
+            }
+          });
+        }
+
+        function tagNer() {
+            area = window.area
+            var start = area.selectionStart;
+            var end = area.selectionEnd;
+            var selection = area.textContent.substring(start, end);
+            var ner = "<persName>" + selection + "</persName>";
+            area.value = replaceAt(area.value, start, end, ner);
+        }
+
+        function changeDir(d) {
+          var pre = $('#area');
+          pre.attr('dir', d);
+        }
+
+        function replaceAt(str, start, end, content) {
+            return str.substring(0, start) + content + str.substring(end);
+        }
+
+	</script>
+</body></html>
