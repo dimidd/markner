@@ -81,7 +81,8 @@
             var settings = $.extend({
                 'selector': '.highlighter-container',
                 'minWords': 0,
-                'complete': function() {}
+                'complete': function() {},
+                'before': function() {}
             }, options);
             var numClicks = 0;
             var topOffset = 0;
@@ -99,6 +100,7 @@
                  * some inspiration.
                  */
                 function insertSpanAfterSelection(clicks) {
+                    settings.before();
                     var html = "<span class='dummy'><span>";
                     topOffset = 0;
                     leftOffset = 0;

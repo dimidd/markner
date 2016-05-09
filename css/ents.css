@@ -1,0 +1,23 @@
+.persName {
+    color: red !important;
+}
+
+.orgName {
+    color: #f9a100 !important;
+}
+
+.bibl {
+    color: #1eff1e !important;
+}
+
+.placeName {
+    color: #4ebaff !important;
+}
+
+.meeting {
+    color: #ff00ff !important;
+}
+
+.other {
+    color: rgb(255, 255, 0) !important;
+}
