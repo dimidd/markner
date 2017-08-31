@@ -1,108 +1,119 @@
 <html>
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-        <link rel="stylesheet" type="text/css" href="./css/application.css">
-        <link rel="stylesheet" type="text/css" href="./css/markner.css">
-        <link rel="stylesheet" type="text/css" href="./css/tooltipster.css">
 
-        <script type="text/javascript" src="./js/jquery.min.js"></script>
-        <script type="text/javascript" src="./js/jquery.tooltipster.min.js"></script>
-        <script type="text/javascript" src="./js/rangy-core.js"></script>
-        <script type="text/javascript" src="./js/rangy-classapplier.js"></script>
-        <!-- src:  http://huffpostlabs.github.io/highlighter.js/ -->
-        <script type="text/javascript" src="./js/jQuery.highlighter.js"></script>
-        <script type="text/javascript" src="./js/tag_nes.js"></script>
-  </head>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+    <link rel="stylesheet" type="text/css" href="./css/tooltipster.main.min.css">
+    <link rel="stylesheet" type="text/css" href="./css/tooltipster.bundle.min.css">
+    <link rel="stylesheet" type="text/css" href="./css/markner.css">
+
+    <script src="./js/jquery-3.2.1.min.js"></script>
+    <style type="text/css"></style>
+    <script src="./js/tooltipster.main.min.js"></script>
+    <script src="./js/tooltipster.bundle.min.js"></script>
+    <script src="./js/rangy-core.js"></script>
+    <script src="./js/rangy-textrange.js"></script>
+    <script src="./js/rangy-classapplier.js"></script>
+    <!-- src:  http://huffpostlabs.github.io/highlighter.js/ -->
+    <script src="./js/jQuery.highlighter.js"></script>
+
+    <script src="./js/markner.js"></script>
+
+</head>
 
 <body>
     <h1 id="title" style="text-align: center">Markner</h1>
-    <h3 style="text-align: center">Markner is a simple tool to tag named entities.</h3>
-    <h2 style="text-align: center">Select to mark NEs, hover to tag NEs.</h2>
+    <h2 style="text-align: center">Markner is a simple tool to tag named entities.</h2>
+    <h3 style="text-align: center">Select to mark NEs, hover to tag NEs.</h3>
     <div style="margin-left: 10%;">
         <form>
-          <!--
+            <!--
           Enter a url or upload a text file
           <input type="url" id="url"></input>
           <input type="submit" id="url-btn" value="Load" onclick="loadDoc()"></input>
           <input type="file" id="file">
           //-->
-          Upload a text file
-          <input type="file" id="file"></input>
+            Upload a text file
+            <input type="file" id="file"></input>
         </form>
         <button type="button" onclick="changeDir('ltr')">LTR</button>
         <button type="button" onclick="changeDir('rtl')">RTL</button>
 
-        <br> 
+        <br>
         <div id="area" dir="ltr">
             <article class="txt-edit" id="xml" style="width: 85%; height: 80%;" contenteditable="true">
-                    Highlight some body text! 
-                    This is a <span class="ne">jQuery</span> plugin that allows you to display a pop-up tooltip when a user highlights text. This can be useful in a variety
-                        of situations, and there didn't seem to be a good open source solution before this.
-                        on how to implement this on your website. It's very easy!
+                Highlight some text! This is a <span class="ne">jQuery</span> based plugin that allows you to tag named entities quickly. Try to select some text. Try to hover over words with black background like <span class="ne">this one</span>.
             </article>
         </div>
-	</div>
+    </div>
 
     <span class="holder" style="display: none; position: absolute; top: 323.4375px; left: 721.1953125px;">
         <div class="share-highlight-btn">
             <div class="btn-left" onclick="markNe()">NE</div>
-            <div class="btn-left" onclick="unmarkNe()">Non-NE</div>
             <div class="btn-right">×</div>
         </div>
     </span>
 
- 
+
     <span id="tooltip-content" style="display: none;"></span>
 
-	<script type="text/javascript">
-		$(document).ready(function() {
-            window.area = document.getElementById('area');
-            window.fileIn = document.getElementById('file');
-            window.file.addEventListener('change', readDoc);
-            initializeMarkner();   
-		});
+    <script type="text/javascript">
+        $(document).ready(
+            function() {
+                window.area = document.getElementById('area');
+                window.fileIn = document.getElementById('file');
+                window.file.addEventListener('change', readDoc);
+                marknerize();
+            });
 
+        function marknerize() {
+            const neClasses = 'persName orgName bibl placeName meeting other';
+            const userHtml = './ents.html';
+            const userCss = './css/ents.css';
+            initMarkner(neClasses, userHtml, userCss, function() {});
+        }
 
         function readDoc() {
-          var file = window.fileIn.files[0];
-          if (file.type.match(/text.*/)) {
-            var reader = new FileReader();
-            reader.onload = function() {
-              $('#xml')[0].innerHTML = reader.result;
+            var file = window.fileIn.files[0];
+            if (file.type.match(/text.*/)) {
+                var reader = new FileReader();
+                reader.onload = function() {
+                    $('#xml')[0].innerHTML = reader.result;
+                }
+                reader.readAsText(file);
+                marknerize();
+            } else {
+                window.area.textContent = "Error: only text files are supported";
             }
-            reader.readAsText(file);
-            initializeMarkner();
-          }
-          else {
-            window.area.textContent = "Error: only text files are supported";
-          }
         }
 
         function loadDoc(url) {
-          url = $('#url')[0].val()
-          if (url.slice(0,4) == "file:")
-            uri = url.replace(/^file:\/\//, '');
-          else
-            uri = url;
-          $.ajax({
-            async: true,
-            url: uri,
-            dataType: 'text',
-            success: function(data) {
-              window.area.textContent = data;
-            },
-            error: function(xhr, ajaxOptions, thrownError) {
-              window.area.textContent = "failed";
-            },
-            complete: function() {
-                alert("fdgdfgdfg");
-            }
-          });
+            url = $('#url')[0].val()
+            if (url.slice(0, 4) == "file:")
+                uri = url.replace(/^file:\/\//, '');
+            else
+                uri = url;
+            $.ajax({
+                async: true,
+                url: uri,
+                dataType: 'text',
+                success: function(data) {
+                    window.area.textContent = data;
+                },
+                error: function(xhr, ajaxOptions, thrownError) {
+                    window.area.textContent = "failed";
+                },
+                complete: function() {
+                    alert("fdgdfgdfg");
+                }
+            });
         }
 
         function changeDir(d) {
-          var pre = $('#area');
-          pre.attr('dir', d);
+            var pre = $('#area');
+            pre.attr('dir', d);
         }
-	</script>
-</body></html>
+    </script>
+</body>
+
+</html>
